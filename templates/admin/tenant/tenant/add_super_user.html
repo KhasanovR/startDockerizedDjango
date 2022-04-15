@@ -1,0 +1,98 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+
+{% if not is_popup %}
+    {% block breadcrumbs %}
+        <div class="breadcrumbs">
+            <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+            &rsaquo;
+            <a href="{% url 'admin:app_list' app_label=cl.opts.app_label %}">
+                {{ cl.opts.app_config.verbose_name|capfirst }}
+            </a>
+            &rsaquo;
+            <a href="{% url cl.opts|admin_urlname:'changelist' %}">{{ cl.opts.verbose_name_plural|capfirst }}</a>
+            &rsaquo;
+            <a href="{% url cl.opts|admin_urlname:'change' original.pk %}">{{ original.name|capfirst }}</a>
+            &rsaquo;
+            {{ cl.opts.title }}
+        </div>
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+    <div id="content-main">
+    {% block object-tools %}
+        {% if change %}{% if not is_popup %}
+            <ul class="object-tools">
+                {% block object-tools-items %}
+                    {% change_form_object_tools %}
+                {% endblock %}
+            </ul>
+        {% endif %}{% endif %}
+    {% endblock %}
+
+    <h1>Add super user</h1>
+
+    <form action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+        {% csrf_token %}
+        {% block form_top %}{% endblock %}
+
+        {% if errors.username or errors.password %}
+            <p class="errornote">
+                {% if errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}
+                    {% trans "Please correct the errors below." %}{% endif %}
+            </p>
+        {% endif %}
+
+        <fieldset class="module aligned ">
+
+            <div class="form-row">
+                <label for="username" class="required">
+                    <b>Username:</b>
+                </label>
+                {% if errors and errors.username %}
+                    <ul class="errorlist">
+                        {% for error in errors.username %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <input id="username" name="username" type="text" maxlength="150" class="vTextField" required
+                       value="{% if username %}{{ username }}{% endif %}">
+            </div>
+
+            <div class="form-row">
+                <label for="password" class="required">
+                    <b>Password:</b>
+                </label>
+                {% if errors and errors.password %}
+                    <ul class="errorlist">
+                        {% for error in errors.password %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <input id="password" name="password" type="password" maxlength="50" class="vTextField" required>
+            </div>
+
+            <div class="form-row align-right">
+                <input type="submit" value="Save">
+            </div>
+
+        </fieldset>
+
+    </form>
+{% endblock %}

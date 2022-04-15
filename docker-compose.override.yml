@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  db:
+    environment:
+      - POSTGRES_USER=my_app
+      - POSTGRES_DB=my_app
+      - POSTGRES_PASSWORD=my_app
+    volumes:
+      - my_app_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - 6379:6379
+    volumes:
+      - my_app_redis:/data
+
+  nginx:
+    volumes:
+      - ./docker/nginx/letsencrypt/fullchain.pem:/etc/letsencrypt/live/${PRODUCTION_HOST}/fullchain.pem
+      - ./docker/nginx/letsencrypt/privkey.pem:/etc/letsencrypt/live/${PRODUCTION_HOST}/privkey.pem
+      - ./media:/app/media:ro
+      - ./static:/app/static:ro
+
+  app:
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - ./static:/app/static
+    command: python ./manage.py runserver 0.0.0.0:8000
+
+  celery-worker:
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - ./static:/app/static
+
+  celery-beat:
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - ./static:/app/static
+
+volumes:
+  my_app_db:
+  my_app_redis:

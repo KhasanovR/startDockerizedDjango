@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+
+{% if not is_popup %}
+    {% block breadcrumbs %}
+        <div class="breadcrumbs">
+            <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+            &rsaquo;
+            <a href="{% url 'admin:app_list' app_label=cl.opts.app_label %}">
+                {{ cl.opts.app_config.verbose_name|capfirst }}
+            </a>
+            &rsaquo;
+            <a href="{% url cl.opts|admin_urlname:'changelist' %}">{{ cl.opts.verbose_name_plural|capfirst }}</a>
+            &rsaquo;
+            <a href="{% url cl.opts|admin_urlname:'change' original.pk %}">{{ original.name|capfirst }}</a>
+            &rsaquo;
+            {{ cl.opts.title }}
+        </div>
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+    <div id="content-main">
+        {% block object-tools %}
+            {% if change %}{% if not is_popup %}
+                <ul class="object-tools">
+                    {% block object-tools-items %}
+                        {% change_form_object_tools %}
+                    {% endblock %}
+                </ul>
+            {% endif %}{% endif %}
+        {% endblock %}
+
+        <h1>Users of company {{ original.name|capfirst }}</h1>
+
+        <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+
+            <table style="width: 100%">
+                <thead>
+                <tr class="row1">
+                    <td style="font-size: 14px; color: black; background-color: lightgray">{% trans 'NAME' %}</td>
+                    <td style="font-size: 14px; color: black; background-color: lightgray">{% trans 'USERNAME' %}</td>
+                    <td style="font-size: 14px; color: black; background-color: lightgray">{% trans 'IS ACTIVE' %}</td>
+                    <td style="font-size: 14px; color: black; background-color: lightgray">{% trans 'IS ADMINISTRATOR' %}</td>
+                    <td style="font-size: 14px; color: black; background-color: lightgray">{% trans 'ACTIONS' %}</td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr class={% if forloop.counter0|divisibleby:2 %}{{ "row2" }}{% else %}{{ "row1" }}{% endif %}>
+                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                        <td>{{ user.username }}</td>
+                        <td><img src="
+
+
+                                {% if user.is_active %}{% static 'admin/img/icon-yes.svg' %}{% else %}{% static 'admin/img/icon-no.svg' %}{% endif %}">
+                        </td>
+                        <td><img src="
+
+
+                                {% if user.is_superuser %}{% static 'admin/img/icon-yes.svg' %}{% else %}{% static 'admin/img/icon-no.svg' %}{% endif %}">
+                        </td>
+                        <td>
+
+                            <a href="{% url opts|admin_urlname:'change_password' original.id user.id %}">
+                                {% trans 'Change password' %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+{% endblock %}
